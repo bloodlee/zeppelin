@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.zeppelin.display.AngularObjectRegistry;
 import org.apache.zeppelin.user.AuthenticationInfo;
@@ -56,7 +57,7 @@ public class InterpreterContext {
   private String paragraphId;
   private String paragraphText;
   private AuthenticationInfo authenticationInfo;
-  private Map<String, Object> config = new HashMap<>();
+  private Map<String, Object> config = new ConcurrentHashMap<>();
   private GUI gui = new GUI();
   private GUI noteGui = new GUI();
   private AngularObjectRegistry angularObjectRegistry;
@@ -157,7 +158,7 @@ public class InterpreterContext {
     this.paragraphTitle = paragraphTitle;
     this.paragraphText = paragraphText;
     this.authenticationInfo = authenticationInfo;
-    this.config = config;
+    this.config.putAll(config);
     this.gui = gui;
     this.noteGui = noteGui;
     this.angularObjectRegistry = angularObjectRegistry;

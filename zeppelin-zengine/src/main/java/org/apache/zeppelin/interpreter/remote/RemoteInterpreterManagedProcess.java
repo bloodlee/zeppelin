@@ -114,8 +114,9 @@ public class RemoteInterpreterManagedProcess extends RemoteInterpreterProcess
 
     logger.info("Thrift server for callback will start. Port: {}", callbackPort);
     try {
+      // limit the max worker thread count to 20
       callbackServer = new TThreadPoolServer(
-        new TThreadPoolServer.Args(tSocket).processor(
+        new TThreadPoolServer.Args(tSocket).maxWorkerThreads(25).processor(
           new RemoteInterpreterCallbackService.Processor<>(
             new RemoteInterpreterCallbackService.Iface() {
               @Override
@@ -235,6 +236,10 @@ public class RemoteInterpreterManagedProcess extends RemoteInterpreterProcess
     executor = null;
     watchdog = null;
     running.set(false);
+
+    // close the pool
+    closePool();
+
     logger.info("Remote process terminated");
   }
 

@@ -18,6 +18,7 @@ package org.apache.zeppelin.interpreter.remote;
 
 import com.google.gson.Gson;
 import org.apache.commons.pool2.impl.GenericObjectPool;
+import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.apache.thrift.TException;
 import org.apache.zeppelin.helium.ApplicationEventListener;
 import org.apache.zeppelin.interpreter.InterpreterException;
@@ -57,9 +58,25 @@ public abstract class RemoteInterpreterProcess implements InterpreterClient {
 
   public synchronized Client getClient() throws Exception {
     if (clientPool == null || clientPool.isClosed()) {
-      clientPool = new GenericObjectPool<>(new ClientFactory(getHost(), getPort()));
+      // default max client is 8, extend it to 20.
+      GenericObjectPoolConfig config = new GenericObjectPoolConfig();
+      config.setMaxTotal(20);
+      config.setMaxIdle(20);
+
+      clientPool = new GenericObjectPool<>(
+        new ClientFactory(getHost(), getPort()), config);
     }
-    return clientPool.borrowObject();
+    return clientPool.borrowObject(5_000);
+  }
+
+  protected synchronized void closePool() {
+    if (clientPool != null && !clientPool.isClosed()) {
+      clientPool.clear();
+
+      clientPool.close();
+
+      clientPool = null;
+    } 
   }
 
   private void releaseClient(Client client) {

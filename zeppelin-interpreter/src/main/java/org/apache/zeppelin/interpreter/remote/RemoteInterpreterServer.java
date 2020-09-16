@@ -162,7 +162,7 @@ public class RemoteInterpreterServer extends Thread
       logger.info("Launching ThriftServer at " + this.host + ":" + this.port);
     }
     server = new TThreadPoolServer(
-        new TThreadPoolServer.Args(serverTransport).processor(processor));
+        new TThreadPoolServer.Args(serverTransport).maxWorkerThreads(20).processor(processor));
     logger.info("Starting remote interpreter server on port {}", port);
     remoteWorksResponsePool = Collections.synchronizedMap(new HashMap<String, Object>());
     remoteWorksController = new ZeppelinRemoteWorksController(this, remoteWorksResponsePool);
